@@ -1,0 +1,13 @@
+{
+  "name": "com.avabuild.inspector",
+  "displayName": "AvaBuild Inspector",
+  "version": "0.1.0",
+  "unity": "2022.3",
+  "description": "VRChat avatar performance preview and cause inspector.",
+  "author": {
+    "name": "AvaBuild Inspector"
+  },
+  "dependencies": {
+    "com.vrchat.avatars": "3.10.5"
+  }
+}

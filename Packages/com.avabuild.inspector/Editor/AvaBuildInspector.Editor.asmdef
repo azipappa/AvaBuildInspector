@@ -1,0 +1,27 @@
+{
+  "name": "AvaBuildInspector.Editor",
+  "rootNamespace": "AvaBuildInspector",
+  "references": [
+    "VRC.SDKBase",
+    "VRC.SDK3A",
+    "VRC.Enums.Validation.Performance",
+    "VRC.Dynamics",
+    "VRC.SDK3.Dynamics.PhysBone"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [
+    {
+      "name": "com.vrchat.avatars",
+      "expression": "3.0.0",
+      "define": "AVABUILD_VRCSDK3"
+    }
+  ],
+  "noEngineReferences": false
+}

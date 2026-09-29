@@ -1,0 +1,7 @@
+# Track only the AvaBuildInspector editor extension package
+/*
+!.gitignore
+!Packages/
+Packages/*
+!Packages/com.avabuild.inspector/
+!Packages/com.avabuild.inspector/**
