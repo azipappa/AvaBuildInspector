@@ -19,37 +19,60 @@ namespace AvaBuildInspector
     {
         public static AvatarReport Analyze(GameObject avatarRoot, TargetPlatform platform)
         {
+            var operation = BeginAnalyze(avatarRoot, platform);
+            while (operation.Advance()) { }
+            return operation.Report;
+        }
+
+        public static AvatarAnalysisOperation BeginAnalyze(GameObject avatarRoot, TargetPlatform platform)
+        {
             if (avatarRoot == null) throw new ArgumentNullException(nameof(avatarRoot));
 
             var mobile = platform == TargetPlatform.Android;
             var stats = new AvatarPerformanceStats(mobile);
-            AvatarPerformance.CalculatePerformanceStats(avatarRoot.name, avatarRoot, stats, mobile);
-
-            var report = new AvatarReport
+            AvatarReport report = null;
+            AvatarAnalysisOperation operation = null;
+            var stages = new List<AvatarAnalysisStage>
             {
-                AvatarRoot = avatarRoot,
-                Platform = platform,
-                Timestamp = DateTime.Now,
-                OverallRank = stats.GetPerformanceRatingForCategory(AvatarPerformanceCategory.Overall)
+                new AvatarAnalysisStage
+                {
+                    Label = "VRChat SDK performance",
+                    Execute = () => AvatarPerformance.CalculatePerformanceStats(avatarRoot.name, avatarRoot, stats, mobile)
+                },
+                new AvatarAnalysisStage
+                {
+                    Label = "SDK metrics",
+                    Execute = () =>
+                    {
+                        report = new AvatarReport
+                        {
+                            AvatarRoot = avatarRoot,
+                            Platform = platform,
+                            Timestamp = DateTime.Now,
+                            OverallRank = stats.GetPerformanceRatingForCategory(AvatarPerformanceCategory.Overall)
+                        };
+                        AddSizeMetrics(report, stats);
+                        AddMeshMetrics(report, stats);
+                        AddDynamicsMetrics(report, stats);
+                        AddRenderingMetrics(report, stats);
+                    }
+                },
+                new AvatarAnalysisStage { Label = "Texture contributors", Execute = () => TryContributors(report, "Texture", () => AddTextureContributors(report, avatarRoot)) },
+                new AvatarAnalysisStage { Label = "Mesh / Material contributors", Execute = () => TryContributors(report, "Mesh / Material", () => AddMeshContributors(report, avatarRoot)) },
+                new AvatarAnalysisStage { Label = "PhysBone contributors", Execute = () => TryContributors(report, "PhysBone", () => AddPhysBoneContributors(report, avatarRoot)) },
+                new AvatarAnalysisStage { Label = "Bounds contributors", Execute = () => TryContributors(report, "Bounds", () => AddBoundsContributors(report, avatarRoot)) },
+                new AvatarAnalysisStage { Label = "Contact contributors", Execute = () => TryContributors(report, "Contacts", () => AddContactContributors(report, avatarRoot)) },
+                new AvatarAnalysisStage { Label = "Constraint contributors", Execute = () => TryContributors(report, "Constraints", () => AddConstraintContributors(report, avatarRoot)) },
+                new AvatarAnalysisStage { Label = "Animation contributors", Execute = () => TryContributors(report, "Animation", () => AddAnimationContributors(report, avatarRoot)) },
+                new AvatarAnalysisStage { Label = "Rendering contributors", Execute = () => TryContributors(report, "Rendering", () => AddRenderingContributors(report, avatarRoot)) },
+                new AvatarAnalysisStage { Label = "Particle contributors", Execute = () => TryContributors(report, "Particles", () => AddParticleContributors(report, avatarRoot)) },
+                new AvatarAnalysisStage { Label = "Cloth contributors", Execute = () => TryContributors(report, "Cloth", () => AddClothContributors(report, avatarRoot)) },
+                new AvatarAnalysisStage { Label = "Physics contributors", Execute = () => TryContributors(report, "Physics", () => AddPhysicsContributors(report, avatarRoot)) },
+                new AvatarAnalysisStage { Label = "Audio contributors", Execute = () => TryContributors(report, "Audio", () => AddAudioContributors(report, avatarRoot)) },
+                new AvatarAnalysisStage { Label = "Finalize report", Execute = () => operation.Report = report }
             };
-
-            AddSizeMetrics(report, stats);
-            AddMeshMetrics(report, stats);
-            AddDynamicsMetrics(report, stats);
-            AddRenderingMetrics(report, stats);
-            TryContributors(report, "Texture", () => AddTextureContributors(report, avatarRoot));
-            TryContributors(report, "Mesh / Material", () => AddMeshContributors(report, avatarRoot));
-            TryContributors(report, "PhysBone", () => AddPhysBoneContributors(report, avatarRoot));
-            TryContributors(report, "Bounds", () => AddBoundsContributors(report, avatarRoot));
-            TryContributors(report, "Contacts", () => AddContactContributors(report, avatarRoot));
-            TryContributors(report, "Constraints", () => AddConstraintContributors(report, avatarRoot));
-            TryContributors(report, "Animation", () => AddAnimationContributors(report, avatarRoot));
-            TryContributors(report, "Rendering", () => AddRenderingContributors(report, avatarRoot));
-            TryContributors(report, "Particles", () => AddParticleContributors(report, avatarRoot));
-            TryContributors(report, "Cloth", () => AddClothContributors(report, avatarRoot));
-            TryContributors(report, "Physics", () => AddPhysicsContributors(report, avatarRoot));
-            TryContributors(report, "Audio", () => AddAudioContributors(report, avatarRoot));
-            return report;
+            operation = new AvatarAnalysisOperation(stages);
+            return operation;
         }
 
         public static void ApplyExactDownloadSize(AvatarReport report, long byteCount)
@@ -198,6 +221,7 @@ namespace AvaBuildInspector
             var triangleMetric = report.Find(AvatarPerformanceCategory.PolyCount);
             var skinnedMeshMetric = report.Find(AvatarPerformanceCategory.SkinnedMeshCount);
             var materialMetric = report.Find(AvatarPerformanceCategory.MaterialCount);
+            var materials = new Dictionary<Material, MaterialUsage>();
             foreach (var renderer in root.GetComponentsInChildren<Renderer>(true))
             {
                 var mesh = GetMesh(renderer);
@@ -243,8 +267,37 @@ namespace AvaBuildInspector
                         SecondaryTarget = renderer.sharedMaterials.FirstOrDefault(material => material != null),
                         Detail = string.Join(", ", renderer.sharedMaterials.Select(material => material == null ? "Missing" : material.name))
                     });
+                    var sharedMaterials = renderer.sharedMaterials;
+                    for (var slot = 0; slot < sharedMaterials.Length; slot++)
+                    {
+                        var material = sharedMaterials[slot];
+                        if (material == null) continue;
+                        if (!materials.TryGetValue(material, out var usage))
+                        {
+                            usage = new MaterialUsage(material);
+                            materials.Add(material, usage);
+                        }
+                        usage.Slots++;
+                        usage.Renderers.Add(renderer);
+                    }
                 }
             }
+
+            foreach (var usage in materials.Values)
+            {
+                var representativeRenderer = usage.Renderers.OrderBy(renderer => GetPath(renderer.transform, root.transform)).FirstOrDefault();
+                report.Materials.Add(new Contributor
+                {
+                    Name = usage.Material.name,
+                    Group = "Materials",
+                    Value = usage.Slots,
+                    Unit = "slots",
+                    Target = usage.Material,
+                    SecondaryTarget = representativeRenderer == null ? null : representativeRenderer.gameObject,
+                    Detail = usage.Slots.ToString("N0") + " slot(s) · " + usage.Renderers.Count.ToString("N0") + " renderer(s)"
+                });
+            }
+            report.Materials.Sort((left, right) => string.Compare(left.Name, right.Name, StringComparison.OrdinalIgnoreCase));
 
             if (triangleMetric != null)
             {
@@ -835,6 +888,15 @@ namespace AvaBuildInspector
             {
                 Texture = texture;
             }
+        }
+
+        private sealed class MaterialUsage
+        {
+            public readonly Material Material;
+            public readonly HashSet<Renderer> Renderers = new HashSet<Renderer>();
+            public int Slots;
+
+            public MaterialUsage(Material material) { Material = material; }
         }
     }
 }

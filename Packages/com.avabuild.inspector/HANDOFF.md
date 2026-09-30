@@ -340,8 +340,24 @@ Texture圧縮テストは、元に戻せるテスト用Textureで行う。共有
     - 最小サイズ、長いAvatar名、長いHierarchyパス、多数のTextureを使った状態で手動スモークテストする。
 
 11. **レポートの確認・共有**
-    - 現在のスキャン対象、Platform、Overall、主要な問題、各内訳の件数をクリップボードへコピーできるようにする。
-    - エラーやUnavailableの理由は、Consoleだけでなく該当箇所のUIから確認できるようにする。
+   - 現在のスキャン対象、Platform、Overall、主要な問題、各内訳の件数をクリップボードへコピーできるようにする。
+   - エラーやUnavailableの理由は、Consoleだけでなく該当箇所のUIから確認できるようにする。
+
+### 2026-09-30 実装更新
+
+- **候補1: 実装** — 複数選択TextureのDefault / PC / Android各項目にUI Toolkitの混在値表示を追加した。変更したフィールドだけを選択中全TextureのDraftへ書き込み、Apply前にTexture数・設定数・対象Platformを確認する。混在値を先頭Textureの値と誤認しないための初期表示である。検索/フィルター中の「表示中を選択」は現在表示される行だけを対象とし、選択済みの非表示Texture数もパネルに表示する。
+- **候補4: 実装** — 圧縮設定パネルをTexture一覧の後ろへ移動し、ウィンドウ初期状態から表示する。選択なし説明、選択枚数、対象Platform、保留件数、破棄/Applyを同じパネルに配置した。
+- **候補2: 実装** — 全内訳に名前/詳細/Hierarchyパス検索、値の大きい順ソート、コンパクト表示切り替えを追加した。詳細タブはContributor.Groupごとに折りたたみ、グループ件数、MaterialのMissing数、PhysBone未使用候補数を表示し、開閉状態を再描画後も保持する。PhysBone未使用候補フィルターと併用できる。
+- **候補3: 実装（安定経路）** — 選択中TextureごとにAvatar配下RendererのMaterial、Material Slot、Shader texture propertyを列挙し、RendererのHierarchy選択/PingとMaterialのProject選択/Pingを提供した。Scene色付けはSelection等の状態に左右されるため実装していない。Renderer.sharedMaterialsから現在確認できる参照が対象で、独自Shaderの非Texture参照やAvatar外のMaterial利用状況は示さない。
+- **候補5: 実装（キャンセルは段階境界）** — スキャン中は結果をクリアして進捗バーを出し、完了結果にAvatar名・Platform・時刻を表示する。解析はSDK集計とContributor種別ごとの段階に分け、各段階の間でキャンセルできる。SDKの集計1回と各Contributor種別の処理中は中断できない。解析サブ処理の警告は結果画面に出す。Avatar配下のTransform/Component構成署名の変化と、Avatar配下Componentに対するUndo対象変更後に古い可能性のある結果として警告し、再スキャンを促す。Hierarchy署名は親子・名前・activeSelf・Component型を比較する。Asset単体変更の検知は未実装。
+- **候補6: 実装（復元は仮実装）** — Avatar変更、Platform変更、明示的な再スキャン、Draft破棄、Apply、ウィンドウ終了で確認を行う。終了時は`Library/AvaBuildInspector/pending-texture-drafts.json`への保持または破棄を選択し、再オープン時に保持したDraftを読み戻す。Unity再コンパイル中はDraftをLibraryへ自動退避する。Apply直前のImporter設定（変更対象Platform）を`Library/AvaBuildInspector/texture-settings-backup.json`へ保存し、Textureパネルから直前Apply前へ復元できるようにした。バックアップは次のApplyで置き換わり、正常復元後に削除される。Unity Undoそのものは未実装。
+- **候補7: 実装** — 全内訳で検索と値順ソート、検索ゼロ件の解除ボタンを追加した。Textureメモリの1/4 MB以上、Skinned Meshの三角形数/Blend Shape、Material Slotのスロット数/Missing、PhysBone未使用候補で絞り込める。検索/フィルター/ソート条件は各コントロールに表示され、絞り込み件数も表示する。
+- **候補8: 部分実装** — コンパクト表示切り替えを追加した。グループ折りたたみ状態、検索/フィルター/ソート/表示モードはウィンドウ内で保持する。
+- **候補9: 実装** — 全詳細Contributor行の名前直下にScene Object / Project Assetの種類とパスを表示し、ツールチップで全文を確認できる。Skinned MeshやMaterial Slotでは関連Mesh/Materialの専用ボタンを追加した。Texture行は同じ位置にProject Assetパスを表示し、使用箇所の参照行にRendererとMaterialの選択/Pingを用意した。Missing対象は行を無効化して理由を表示する。
+- **候補10: 実装（手動検証待ち）** — 既存の最小ウィンドウ幅620pxを維持し、検索ツール列は狭幅時に折り返す。名前/パス/詳細は省略表示とツールチップ、値列は固定幅で優先する。最小幅・長名・大量項目のGUI手動スモークテストは未実施。
+- **候補11: 実装** — Avatar、Platform、解析時刻、Overall、主要問題、各Metricの値/Rank/件数/精度、警告をクリップボードへコピーするボタンを追加した。Unavailableの説明はMetric名のツールチップから確認できる。
+
+SceneハイライトはSelection等の状態に左右されるため未実装。Importer復元と終了時Draft保持はLibraryファイルを使う仮実装で、まだUnity GUIによる保存/復元動作確認が必要である。Applyバックアップは次のApplyで上書きされる。Unity GUIで混在値表示、Apply/復元後のImporter実値と再インポート、再オープン時のDraft保持、参照行の移動、狭い幅の手動確認を行う。
 
 
 ## 12. 現在の検証状況
@@ -350,4 +366,91 @@ Texture圧縮テストは、元に戻せるテスト用Textureで行う。共有
 - asmdefはEditor専用になっている。
 - パッケージ外のコードへ直接依存していない。
 - 実Avatarごとの数値妥当性、Platform別Format、圧縮後の見た目は移行先でも再確認すること。
+- 2026-09-30: 最終ソースをUnity同梱Roslyn (`DotNetSdkRoslyn/csc.dll`) とUnity Bee生成のEditor用response fileでコンパイル成功。キャンセル可能な段階式スキャンを含む最新変更後も再実行し、Tempへ検証DLL (89,088 bytes) を出力した。プロジェクト成果物は上書きしていない。
+- Unity Editor batchmodeでの実行は、Hubライセンス修復後もEditorのLicensingClient IPCが60秒でタイムアウトし終了コード199となった。試行時にreadonly databaseメッセージも出た。したがってEditorドメインロード/ILPostProcessとGUI手動スモークテストは未確認。Hub/Editorを正常起動できる状態でImporter Apply/復元、Draft再オープン、Hierarchy移動を確認すること。
+- 最終差分の静的確認ではUI Toolkit `BaseField.showMixedValue`、ShaderUtilによるTexture property参照列挙、Contributor.Group/Mesh参照、Draft/BackupのJSON構造と呼び出し整合性を確認した。`git diff --check`に空白エラーなし。Unity上の表示・入力挙動とImporter Apply/復元の実データ結果は未確認。
 
+### Unity GUIでの手動検証手順（未実施）
+
+1. バージョン管理済みのテスト用Textureを2枚選び、ImporterのMax Size/Compressionを別々にする。Texture内訳で両方を選び、混在表示を確認して1項目だけ変更する。選択両方にPending表示が出ること、他項目の値は保持されることを確認する。
+2. Applyダイアログに対象Asset/Platformが出ることを確認し、Apply後にImporter Inspectorで値を確認する。`直前のApplyを復元`を実行し、対象Platformの元値へ戻ることを確認する。
+3. Draftを作ってウィンドウを閉じ、「保持して閉じる」を選ぶ。再度開いてDraftが復元されることを確認する。同じ手順で破棄を選んだ場合は再表示されないことを確認する。
+4. スキャン後にAvatarのHierarchyまたはUndo対象プロパティを変更し、古い結果の警告が出ること、再スキャンで警告が消えることを確認する。
+5. Texture使用箇所のRendererとMaterialボタンがHierarchy/Projectの対象を選択・Pingすることを確認する。
+6. Scan中の進捗バーでキャンセルし、結果が古い情報として再利用されず再スキャンできることを確認する。各段階の処理中はキャンセルが反映されないことも確認する。
+7. ウィンドウ幅620px、長いObject/Asset名、大量Contributorを用意し、フィルター・グループ折りたたみ・コンパクト表示・コピー結果を確認する。
+
+## 13. 2026-09-30 UI改善
+
+- Texture圧縮設定パネルをTexture一覧のスクロール領域から分離し、内訳画面の下端に固定した。Texture未選択時はパネルを隠し、行のチェック時に下部領域が開いて一覧が縮む。UI Toolkitの高さ遷移による時間ベースのスライドアニメーションは未実装で、現状はレイアウトによる表示切り替え。
+- Texture行の各Texture名の下に使用箇所・Material参照Foldoutを設置した。展開時にだけAvatar配下のRenderer/Materialを検索し、RendererのHierarchy選択・Ping、MaterialのProject選択・Ping、Material Slot、Texture property名を表示する。従来の圧縮パネル内にあった一括参照リストは削除。
+- Texture / Skinned Mesh / Material Slot / PhysBone各行の名前直下にあったHierarchy/Assetパス表示を削除。行の名前ツールチップと検索対象にはパスを残した。Contributor.Detailがある詳細行では、Missing等の詳細情報を引き続き表示する。
+- Textureメモリの内訳見出しを明示的に左寄せに指定。
+- Textureメモリ一覧では、サムネイル右側のTexture名ラベルも明示的に左寄せに指定し、ラベル領域を左揃えにした。
+- Material Slot内訳ではContributorの代表Material、Skinned Mesh内訳ではMeshをUnity `AssetPreview.GetAssetPreview`で画像表示する。非同期プレビューの生成中は既存のMiniThumbnailを出し、生成完了後に差し替える。ほかの内訳のサムネイル表示は変更しない。
+
+## 14. SDKビルド履歴
+
+- メインタブ「ビルド履歴」を追加。VRChat SDK Avatar Builderの公開SDKイベントへ接続し、SDKビルド開始時にAvatarのSDK性能Metricを取得、成功/失敗時にレポート履歴を保存する。
+- 成功時はSDKから通知されるBundle pathを使ってBundleのファイルサイズを取得し、Download Size MetricをExact値へ更新する。Uncompressed SizeはQuick Scan/API経由で取れない場合Unavailableのまま表示する。
+- 履歴には日時、Avatar名、Platform、成否、Overall Rank、Metric名/値/Rank/Accuracy/説明、Quick Scan警告を保存する。TextureメモリはSDK合計Metricのみで、Textureごとの内訳/contributorは保存しない。
+- 履歴UIをカードと詳細レポートに再構成した。保存件数/成功/失敗の概要カード、成否色付きAvatar履歴カード、選択中レポートのStatus/Overall Rank/Bundle Size/Metric数、Section別Foldoutメトリクス表を表示する。Metric説明はツールチップに表示する。
+- `Library/AvaBuildInspector/build-history.json`に直近100件を保存する。履歴記録実装後のビルドのみが対象で、既存の過去ビルド履歴は遡及復元しない。ビルド失敗イベントがSDKから発行されなかった場合、その失敗は記録されない可能性がある。
+- 性能Metricはビルド開始時点のSource Avatar解析値であり、ビルド後の変換済みObject完全スナップショットではない。SDKのvalidationメッセージ全文も公開イベントからは取得していない。成功Bundleの圧縮サイズは正確値、その他のMetricはSDKが返した精度区分を維持する。
+- Unity GUIのSDK Build Success/Errorイベント実動作、Bundle file size反映、履歴JSONの再起動後読込は未確認。Unity同梱Roslynで新規履歴ファイルを含めたEditorアセンブリ直接コンパイルは成功。GUI確認時はPC/Androidの成功ビルドと失敗ビルドを1件ずつ行い、履歴・Bundleサイズ・Unavailable精度・プロジェクト再起動後の保持を確認する。
+- Texture行の容量表示左にあるMaterial移動ボタンを`Location`と表記し、参照中MaterialをProjectで複数選択してPingする。その隣の開閉ボタンは「参照元オブジェクト」/「参照元オブジェクト・閉じる」と表記する。展開領域では各参照をボタンではないTexture一覧風の行で表示し、行クリックでHierarchy内のRendererのGameObjectを選択・Pingする。名前下のMaterial/Slot/property/Asset pathの小さい説明ラベルは表示しない。親フォルダーグループ化がONの場合、参照元ObjectもHierarchy上の直近親GameObjectパスでグループ化する。参照検索結果はLocationボタンと参照パネルで共有する。
+- Skinned Mesh / Material SlotのグループFoldoutは初期状態を閉じる。ユーザーが開いた状態は再描画時に保持する。
+- Textureメモリ一覧に「親フォルダーでグループ化」オプションを追加。初期状態はOFF。ONにすると3階層（Assets直下のフォルダー名。Assets自体は表示しない / 現在の親ディレクトリ / Texture行）で表示する。Assets直下のTextureは「(ルート)」へ、PackagesなどAssets外は「Assets以外」へまとめ、Assets内グループから間隔を空ける。グループ状態は再描画前にVisualElementから読み取り、チェック変更やオプション切り替え後も保持する。グループ表示時の初回状態は展開。パスが取得できないAssetは専用グループにまとめる。
+- Skinned Mesh / Material Slotにも独立した「親フォルダーでグループ化」オプションを追加。OFF時は従来のAvatar内グループ表示、ON時はTextureと同じ3階層表示。Skinned Meshは関連Mesh Asset、Material Slotは代表Material Assetの親フォルダーを基準にする。表示対象のAssetがない場合は「(パスなし)」にまとめる。
+- 今回はUnity Editor GUIでの見た目と操作検証は未実施。特に下端パネルの高さが小さいウィンドウで圧迫しないか、選択時の表示が期待どおりか、使用箇所のRenderer/Material移動を手動確認する。滑らかなスライドアニメーションが必要ならUnity 2022.3で利用可能なUI Toolkit APIを実機確認して追加する。
+- 今回のソース変更後、Unity同梱RoslynのEditor用response fileを使った直接コンパイルに成功。検証DLLは`Temp/AvaBuildInspector.Editor.verify.dll`へ出力し、Bee生成済みアセンブリは上書きしていない。バッチ起動も再試行したがLicenseClientのIPC接続拒否で終了コード199となり、GUI検証には進めなかった。
+
+
+### ビルド履歴UI調整（2026-09-30）
+- 「保存済み・成功・失敗」の概要カードを削除し、選択中のビルド結果を中心に確認できる構成に変更。
+- 履歴件数に応じて一覧領域の高さを調整（最小54px、最大230px）。一覧が少ない場合に詳細エリアが離れすぎないよう、見出しと詳細カードの余白も縮小。
+- 検証: Unity同梱RoslynによるEditorアセンブリ直接コンパイル成功、`git diff --check` 成功。Unity Editor上での描画確認は未実施。
+
+### マテリアルタブ分割と一覧追加（2026-09-30）
+- 内訳一覧の「マテリアルスロット」を「マテリアル」に変更し、配下のサブタブで「マテリアル」と従来の「マテリアルスロット」を切り替えるUIを追加。
+- 新しいマテリアル一覧はAvatar配下のRenderer.sharedMaterialsからMaterial Assetを参照単位で重複排除して表示する。行にはMaterialプレビュー、使用スロット数、参照Renderer数を表示し、行クリックでProject上のMaterialを選択・Ping、右側のObject操作で代表RendererのGameObjectをHierarchy上で選択する。
+- Materialごとのスロット数は同一MaterialがRenderer間/複数slotで何回使われるかの合計。Missing slotはMaterial AssetがないためMaterial一覧には出ず、従来のスロット内訳で確認する。
+- 親フォルダーグループ化はMaterial Asset path基準。未保存/Asset pathなしMaterialは専用グループにまとめる。
+- 検証: Unity同梱Roslyn Editorアセンブリ直接コンパイル、`git diff --check` を実施。Unity Editor上でのUI操作・表示確認は未実施。
+
+### Materialグループパス修正（2026-09-30）
+- Material一覧のAssetフォルダーグループ化は、代表Renderer（SecondaryTarget）ではなくMaterial Asset（Target）のAssetDatabaseパスを参照するよう修正。Materialの通常表示は無用なフォルダー単位の折りたたみを作らず、グループ化を有効にした場合だけAsset階層で分類する。
+- Material Slotはディレクトリグループ化オプションを外し、既存のRenderer GameObject階層（Contributor.Group）で常に分類する。
+- 検証: Unity同梱Roslyn Editorアセンブリ直接コンパイル、`git diff --check` 成功。AssetDatabaseの実アセットパスとUI表示はUnity Editor上で未確認。
+
+### Textureディレクトリ容量の可視化（2026-09-30）
+- 親フォルダーグループ化時、各Asset階層と親ディレクトリの見出しにTexture推定メモリ合計（MB）と全Texture合計に対する割合を表示し、比率バーを追加。
+- 集計基準は検索/フィルター前の全Texture contributorで固定。絞り込み中もディレクトリの総容量と割合は変化せず、一覧の表示件数だけが絞り込み結果に応じて変わる。割合の母数はTexture別Profiler推定値の合計であり、SDK報告の合計とは一致しない場合がある。
+- 検証: Unity同梱Roslyn Editorアセンブリ直接コンパイル、`git diff --check` を実施。
+
+### Texture圧縮対象をチェック選択へ一本化（2026-09-30）
+- オレンジ色のPending/Draft点、保留件数、変更破棄ボタン、Draftの終了時確認、LibraryへのDraft保存・再読込を削除。
+- チェック中のTextureをすべて現在の対象PlatformへのApply対象にする。未変更の設定もApply対象となり、対象はボタン押下時のチェック状態で決まる。設定UIの混在値と編集値はウィンドウ中だけ保持し、適用後はImporterから再読込する。
+- Avatarを切り替えるとTexture選択と一時設定を消去する。Platform別のImporterバックアップ/復元は維持。
+- 旧実装の`Library/AvaBuildInspector/pending-texture-drafts.json`（3件）は今回削除。今後は生成・読込しない。
+- 検証: Unity同梱Roslyn Editorアセンブリ直接コンパイル、`git diff --check` を実施。Unity Editor GUIでのチェック別Apply動作は未実施。
+
+### Texture圧縮パネルのボタン表記整理（2026-09-30）
+- 圧縮設定パネルの操作語を日本語に統一。「表示中をチェック」「チェックを解除」「選択中に適用」「直前の設定に戻す」とし、適用対象件数もチェック状態と一致する表記にした。
+- 確認ダイアログの操作ボタンも「適用」に統一。
+- 検証: Unity同梱Roslyn Editorアセンブリ直接コンパイル、`git diff --check` 成功。
+
+### Texture容量割合の表示切り替え（2026-09-30）
+- Textureメモリで「親フォルダーでグループ化」をONにしたときだけ「容量の割合を表示」オプションを表示。初期値はON。
+- OFF時はAsset階層/親ディレクトリ見出しの割合表示と比率バーを隠す。推定容量（MB）は引き続き表示する。合計・割合の全Texture基準と検索/フィルター非依存の集計は維持。
+- 検証: Unity同梱Roslyn Editorアセンブリ直接コンパイル、`git diff --check` を実施。
+
+### Avatar入力と再スキャン操作の配置（2026-09-30）
+- ヘッダーのAvatar ObjectField直後に「再スキャン」ボタンを移動し、Platform選択より前に配置。Avatarのドロップ/選択操作と再スキャンを隣接させた。
+- 検証: Unity同梱Roslyn Editorアセンブリ直接コンパイル、`git diff --check` 成功。
+
+### Texture割合表示のフラット一覧対応と折りたたみ時の維持（2026-09-30）
+- 「容量の割合を表示」は親フォルダーでグループ化していない一覧でも使えるよう変更。OFF時はフラット一覧の個別Texture割合も非表示。
+- フラット一覧では各Textureの全Texture推定合計に対する割合とバーを表示する。
+- グループ表示の割合バーはFoldout内部ではなく見出しの外側に置き、親グループ/子グループを閉じても該当階層の割合が見えるようにした。検索・フィルターによらず全Texture基準の集計は維持。
+- 検証: Unity同梱Roslyn Editorアセンブリ直接コンパイル、`git diff --check` を実施。
