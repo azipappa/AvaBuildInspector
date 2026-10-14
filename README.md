@@ -12,7 +12,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Unity-2022.3-222c37?logo=unity&logoColor=white" alt="Unity 2022.3">
   <img src="https://img.shields.io/badge/VRChat-Avatar-2d9bf0" alt="VRChat Avatar">
-  <img src="https://img.shields.io/badge/VPM-0.1.0-6f42c1" alt="VPM 0.1.0">
+  <img src="https://img.shields.io/badge/VPM-0.1.1-6f42c1" alt="VPM 0.1.1">
   <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License">
 </p>
 
@@ -59,7 +59,7 @@ Releaseに添付された`com.azipaworks.ava-build-inspector-<version>.zip`は�
 
 ## 使い方
 
-1. `Tools > AvaBuild Inspector > Open Inspector`を開きます。
+1. `Tools > Azipa Tools > AvaBuild Inspector`を開きます。
 2. `VRCAvatarDescriptor`を持つAvatarをAvatar欄へドラッグ＆ドロップします。
 3. Quick Scanが自動で実行され、結果が表示されます。
 

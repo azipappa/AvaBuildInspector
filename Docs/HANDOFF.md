@@ -12,7 +12,7 @@ AvaBuild Inspectorは、Scene上のVRChat Avatarを対象に、アップロー�
 
 基本操作:
 
-1. `Tools > AvaBuild Inspector > Open Inspector`を開く。
+1. `Tools > Azipa Tools > AvaBuild Inspector`を開く。
 2. `VRCAvatarDescriptor`を持つAvatarまたはその子ObjectをAvatar欄へドラッグ＆ドロップする。
 3. Quick Scanが自動実行される。
 4. 必要に応じて`再スキャン`を押す。
@@ -219,7 +219,7 @@ NDMF、Modular Avatar、Avatar Optimizerへの直接依存はない。それら�
 4. `.meta`ファイルもすべてコピーする。
 5. `Library`、`Temp`、`Logs`のファイルはコピーしない。
 6. Unityを開き、Package ImportとScript Compileの完了を待つ。
-7. `Tools > AvaBuild Inspector > Open Inspector`が表示されることを確認する。
+7. `Tools > Azipa Tools > AvaBuild Inspector`が表示されることを確認する。
 
 VRCSDKのバージョンを上げる場合は、最初に次を確認する。
 

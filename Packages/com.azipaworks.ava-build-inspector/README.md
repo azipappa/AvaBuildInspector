@@ -4,7 +4,7 @@ VRChat avatar performance preview and cause inspector for Unity 2022.3.
 
 ## Open
 
-Open `Tools > AvaBuild Inspector > Open Inspector` and drag an avatar with a
+Open `Tools > Azipa Tools > AvaBuild Inspector` and drag an avatar with a
 `VRCAvatarDescriptor` into the Avatar field. Quick Scan starts automatically.
 
 ## Implemented in 0.1.0

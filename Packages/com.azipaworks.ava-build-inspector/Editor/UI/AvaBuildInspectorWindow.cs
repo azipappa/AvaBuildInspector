@@ -56,7 +56,7 @@ namespace AvaBuildInspector
         private bool IsScanning => _scanOperation != null;
         private TargetPlatform CurrentPlatform => _platformField == null ? GetInitialPlatform() : (TargetPlatform)_platformField.value;
 
-        [MenuItem("Tools/AvaBuild Inspector/Open Inspector")]
+        [MenuItem("Tools/Azipa Tools/AvaBuild Inspector", false, 916)]
         public static void Open()
         {
             var window = GetWindow<AvaBuildInspectorWindow>();
@@ -254,23 +254,7 @@ namespace AvaBuildInspector
             header.style.paddingBottom = 10;
             rootVisualElement.Add(header);
 
-            var titleRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-            header.Add(titleRow);
-            var appIcon = GetAppIcon();
-            if (appIcon != null)
-            {
-                var titleIcon = new Image { image = appIcon, scaleMode = ScaleMode.ScaleToFit };
-                titleIcon.style.width = 28;
-                titleIcon.style.height = 28;
-                titleIcon.style.marginRight = 7;
-                titleRow.Add(titleIcon);
-            }
-            var title = new Label("AvaBuild Inspector");
-            title.style.fontSize = 18;
-            title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            titleRow.Add(title);
-
-            var inputRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginTop = 8 } };
+            var inputRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
             header.Add(inputRow);
 
             _avatarField = new ObjectField("Avatar") { objectType = typeof(GameObject), allowSceneObjects = true };
