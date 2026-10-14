@@ -1,0 +1,135 @@
+/* AvaBuild Inspector: 一覧行・選択・ホバーのスタイル。
+   ルートに .abi-dark / .abi-light を付けてEditorスキンを切り替える。 */
+
+.abi-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.abi-dark .abi-row--even { background-color: rgb(43, 43, 43); }
+.abi-dark .abi-row--odd { background-color: rgb(57, 57, 57); }
+.abi-dark .abi-row--warning { background-color: rgb(84, 55, 24); }
+.abi-dark .abi-row--checked { background-color: rgb(42, 66, 92); }
+.abi-dark .abi-row:hover { background-color: rgb(72, 72, 72); }
+.abi-dark .abi-row--checked:hover { background-color: rgb(52, 80, 110); }
+.abi-dark .unity-collection-view__item--selected .abi-row { background-color: rgb(44, 93, 135); }
+
+.abi-light .abi-row--even { background-color: rgb(207, 207, 207); }
+.abi-light .abi-row--odd { background-color: rgb(219, 219, 219); }
+.abi-light .abi-row--warning { background-color: rgb(245, 215, 170); }
+.abi-light .abi-row--checked { background-color: rgb(186, 208, 236); }
+.abi-light .abi-row:hover { background-color: rgb(193, 193, 193); }
+.abi-light .abi-row--checked:hover { background-color: rgb(170, 196, 230); }
+.abi-light .unity-collection-view__item--selected .abi-row { background-color: rgb(150, 188, 232); }
+
+.abi-row--link {
+    cursor: link;
+}
+
+.abi-link-label {
+    width: 64px;
+    -unity-text-align: middle-right;
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+.abi-row--link:hover .abi-link-label {
+    opacity: 1;
+}
+
+/* グループ見出し */
+.abi-group-header {
+    flex-direction: row;
+    align-items: center;
+    min-height: 22px;
+    margin-top: 1px;
+    padding-right: 6px;
+}
+
+.abi-dark .abi-group-header { background-color: rgb(36, 36, 36); }
+.abi-dark .abi-group-header:hover { background-color: rgb(50, 50, 50); }
+.abi-light .abi-group-header { background-color: rgb(196, 196, 196); }
+.abi-light .abi-group-header:hover { background-color: rgb(184, 184, 184); }
+
+/* 行にホバーした時だけ表示する操作ボタン */
+.abi-row-cell {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-direction: row;
+    align-items: center;
+    overflow: hidden;
+}
+
+.abi-row-actions {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 4px;
+    padding-right: 2px;
+    display: none;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+.abi-row:hover .abi-row-actions,
+.abi-row--actions-pinned .abi-row-actions {
+    display: flex;
+}
+
+.abi-dark .abi-row-actions { background-color: rgb(72, 72, 72); }
+.abi-light .abi-row-actions { background-color: rgb(193, 193, 193); }
+.abi-dark .unity-collection-view__item--selected .abi-row-actions { background-color: rgb(44, 93, 135); }
+.abi-light .unity-collection-view__item--selected .abi-row-actions { background-color: rgb(150, 188, 232); }
+
+.abi-icon-button {
+    width: 26px;
+    height: 20px;
+    margin: 0 0 0 2px;
+    padding: 1px;
+    align-items: center;
+    justify-content: center;
+}
+
+.abi-dark .abi-icon-button--active { background-color: rgb(64, 120, 173); }
+.abi-light .abi-icon-button--active { background-color: rgb(120, 168, 225); }
+
+/* 圧縮対象チェック: 行の左端全体をクリック領域にする */
+.abi-check-cell {
+    width: 30px;
+    min-width: 30px;
+    align-self: stretch;
+    align-items: center;
+    justify-content: center;
+    margin-right: 2px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.abi-dark .abi-check-cell:hover { background-color: rgba(255, 255, 255, 0.10); }
+.abi-light .abi-check-cell:hover { background-color: rgba(0, 0, 0, 0.10); }
+
+.abi-check-cell .unity-toggle {
+    margin: 0;
+}
+
+.abi-check-cell .unity-toggle__checkmark {
+    width: 17px;
+    height: 17px;
+}
+
+.abi-sort-header {
+    cursor: link;
+}
+
+.abi-sort-header:hover {
+    opacity: 1;
+}
+
+.abi-trend-bar {
+    cursor: link;
+}

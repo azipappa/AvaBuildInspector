@@ -27,6 +27,8 @@ namespace AvaBuildInspector
         public string Unit;
         public UnityEngine.Object Target;
         public UnityEngine.Object SecondaryTarget;
+        /// <summary>SecondaryTargetの代わりに一括選択する対象（Materialを参照する全Renderer等）。</summary>
+        public UnityEngine.Object[] RelatedTargets;
         public string Detail;
         public bool IsUnusedPhysBone;
     }

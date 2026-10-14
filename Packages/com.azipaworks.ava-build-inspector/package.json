@@ -1,0 +1,19 @@
+{
+  "name": "com.azipaworks.ava-build-inspector",
+  "displayName": "AvaBuild Inspector",
+  "version": "0.1.0",
+  "unity": "2022.3",
+  "description": "VRChat avatar performance preview and cause inspector.",
+  "author": {
+    "name": "Azipa Works",
+    "email": "306074014+azipappa@users.noreply.github.com",
+    "url": "https://github.com/azipappa"
+  },
+  "license": "MIT",
+  "documentationUrl": "https://github.com/azipappa/AvaBuildInspector",
+  "changelogUrl": "https://github.com/azipappa/AvaBuildInspector/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/azipappa/AvaBuildInspector/blob/main/LICENSE.txt",
+  "vpmDependencies": {
+    "com.vrchat.avatars": "3.10.x"
+  }
+}

@@ -294,6 +294,9 @@ namespace AvaBuildInspector
                     Unit = "slots",
                     Target = usage.Material,
                     SecondaryTarget = representativeRenderer == null ? null : representativeRenderer.gameObject,
+                    RelatedTargets = usage.Renderers.Where(renderer => renderer != null)
+                        .OrderBy(renderer => GetPath(renderer.transform, root.transform))
+                        .Select(renderer => (UnityEngine.Object)renderer.gameObject).ToArray(),
                     Detail = usage.Slots.ToString("N0") + " slot(s) · " + usage.Renderers.Count.ToString("N0") + " renderer(s)"
                 });
             }

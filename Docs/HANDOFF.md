@@ -101,7 +101,7 @@ AvaBuild Inspectorは、Scene上のVRChat Avatarを対象に、アップロー�
 ## 4. ソース構成
 
 ```text
-Packages/com.avabuild.inspector/
+Packages/com.azipaworks.ava-build-inspector/
 ├─ package.json
 ├─ README.md
 ├─ HANDOFF.md
@@ -215,7 +215,7 @@ NDMF、Modular Avatar、Avatar Optimizerへの直接依存はない。それら�
 
 1. 移行先をUnity 2022.3系のVRChat Avatar Projectとして用意する。
 2. VRChat SDK Avatars 3.10.5が利用可能であることを確認する。
-3. この`Packages/com.avabuild.inspector`フォルダを、フォルダごと移行先の`Packages`直下へコピーする。
+3. この`Packages/com.azipaworks.ava-build-inspector`フォルダを、フォルダごと移行先の`Packages`直下へコピーする。
 4. `.meta`ファイルもすべてコピーする。
 5. `Library`、`Temp`、`Logs`のファイルはコピーしない。
 6. Unityを開き、Package ImportとScript Compileの完了を待つ。
@@ -454,3 +454,67 @@ SceneハイライトはSelection等の状態に左右されるため未実装。
 - フラット一覧では各Textureの全Texture推定合計に対する割合とバーを表示する。
 - グループ表示の割合バーはFoldout内部ではなく見出しの外側に置き、親グループ/子グループを閉じても該当階層の割合が見えるようにした。検索・フィルターによらず全Texture基準の集計は維持。
 - 検証: Unity同梱Roslyn Editorアセンブリ直接コンパイル、`git diff --check` を実施。
+
+### 内訳一覧ツールバーの見やすさ改善（2026-09-30）
+- 検索/フィルター/ソートと表示設定を別行に分離。表示設定は背景付きの専用帯にまとめ、「表示オプション」見出しと区切られたToggleチップで視認性を改善。
+- コンパクト、親フォルダーグループ化、Texture容量割合の各項目にツールチップを追加し、件数表示は帯の右端に配置。
+- 検証: Unity同梱Roslyn Editorアセンブリ直接コンパイル、`git diff --check` を実施。
+
+### ビルド履歴の前回比較表示（2026-09-30）
+- 選択レポートに「前回のビルドとの比較」を追加。同一Avatar名・同一Platformの履歴から、選択中より古い直近の記録を比較対象にする（成否は問わない）。
+- 比較可能な数値Metricについて前回→今回の値、削減/増加率、変化幅バーを表示。割合バーは±100%幅で上限表示し、正確な率はラベル/ツールチップに表示。減少は緑、増加は橙、同値は灰色。
+- 前回値が0の場合は百分率を算出せず「増加 新規」とし、差分をツールチップに表示。Unavailableと数値でないMetricは除外する。
+- 新規履歴にはNumericValue/Unitを保存し、既存履歴はDisplayValueから数値と単位を解析して比較できる場合に利用する。過去記録にMetric値がない場合は比較欄を表示しない。
+- 検証: Unity同梱Roslyn Editorアセンブリ直接コンパイル、`git diff --check` 成功。Unity上での実履歴比較表示は未確認。
+
+### ビルド履歴詳細の表示切り替え（2026-09-30）
+- 選択中のビルド詳細に「ビルドレポート」「前回との比較」の切り替えボタンを追加。通常レポートと比較一覧を同時に縦積みせず、切り替えて閲覧する。
+- 成否・Avatar/Platform・日時・Bundle Size・警告/エラーは共通情報として残し、性能レポート表または増減比較表を選択表示する。
+- 検証: Unity同梱Roslyn Editorアセンブリ直接コンパイル、`git diff --check` 成功。Unity Editor上の表示確認は未実施。
+
+### 表示オプション整理（2026-09-30）
+- 表示オプションから「コンパクト」を削除。関連する状態フラグ/行高さ分岐も除き、標準行サイズで表示する。
+- 検証: Unity同梱Roslyn Editorアセンブリ直接コンパイル、`git diff --check` 成功。
+
+### Avatar未指定時のアイコン表示（2026-09-30）
+- Avatar未指定時の案内を「VRCAvatarDescriptorのあるAvatarを指定してください。」に統一し、その上に依頼添付のアイコンを表示。アイコンは`Editor/Resources/AvatarDropIcon.png`としてパッケージへ追加し、190px枠内で縦横比を維持して中央配置する。
+- この専用空状態以外のスキャンエラー/進行メッセージには画像を表示しない。
+- 検証: Unity同梱Roslyn Editorアセンブリ直接コンパイル、`git diff --check` 成功。UnityでのTexture Importer実表示は未確認。元画像の四隅がalpha 0の透過PNGであることを確認。
+
+### AvaBuild Inspectorアイコン設定（2026-09-30）
+- 添付の`128.png`を`Editor/Resources/AvaBuildInspectorIcon.png`として同梱し、AvaBuild Inspector EditorWindowのタブアイコンとヘッダー見出しに設定。
+- Unity Package Manager manifestの`icon`項目はUnity 2022.3の公式manifest property一覧にないため追加せず、アプリ本体のUIで利用する。
+- 検証: 添付PNGが128x128で透過を保持していることを確認。Unity同梱Roslyn Editorアセンブリ直接コンパイル、`git diff --check` 成功。Unity Editor上のアイコン描画は未確認。
+
+## 15. 2026-10-05 UI使い心地の改善
+
+### ソース構成の変更
+- `AvaBuildInspectorWindow.cs`を部分クラスへ分割した。
+  - `AvaBuildInspectorWindow.cs`: ライフサイクル、ヘッダー、スキャン進行、状態バナー、設定の保存、選択同期
+  - `.ScanResults.cs` / `.Breakdown.cs` / `.TextureCompression.cs` / `.BuildHistory.cs`: 各タブ
+- `UI/AbiTheme.cs`: Dark / Light両スキン用の色。`UI/AvaBuildInspector.uss`: 一覧行・選択・ホバー・チェック領域のスタイル（ルートに`.abi-dark` / `.abi-light`を付与）。
+- `Core/TextureMemoryEstimator.cs`: Import設定の読み取り（`TextureImportInfo`）と、元画像サイズ・Max Size・Format・Mipmapからのメモリ概算。
+
+### 実装内容
+- **スキャン結果 → 内訳**: Texture Memory / Skinned Meshes / Material Slots / PhysBone系の行とMain Issuesのチップから該当内訳タブへ移動。その他でContributorを持つ行はクリックで行内に一覧（最大100件）を開閉。Poor以下の行は左端にRank色の線。
+- **圧縮前の推定**: 圧縮パネルにスキャン中Platformでの推定メモリ（現在→適用後、差分と割合）を表示。Default変更がOverrideで無効になる場合や、別Platformの設定を編集中の場合は注記。適用確認ダイアログにも推定を表示。適用後の再スキャン完了時、Profiler値で前後を通知し、Texture別の結果をConsoleに出力。
+- **古い結果の警告**: ヘッダー下のバナーに「再スキャン」と「自動で再スキャン」（変更検知から1秒後、連続変更はまとめる）を配置。警告表示のために内容全体を再構築しない。
+- **設定の保存**: タブ、内訳タブ、並べ替え、グループ化、割合表示、自動再スキャン、圧縮対象Platform、履歴のPlatform絞り込み・変化のみ表示を`EditorPrefs`（`AvaBuildInspector.*`）に保存。Platformは`SessionState`に保存し、未保存時はActive Build Targetから決める。Avatarは`[SerializeField]`でDomain Reload後も保持。
+- **一覧の仮想化**: 内訳一覧を`ListView`（DynamicHeight）へ変更。グループ見出し・Texture参照元行も平坦化した項目として扱い、チェック・検索・開閉では一覧のデータだけを更新する。
+- **検索**: `ToolbarSearchField`で入力中に反映（200ms待機）。タブごとに検索語を保持。スペース区切りでAND検索。Assetパス・Import設定（例: `BC7`、`非圧縮`）も検索対象。検索中は未操作のグループを自動展開。
+- **Texture行**: Material選択・参照元表示ボタンはアイコン化し、ホバー時（または参照元展開中）のみ表示して名前列を圧迫しない。
+- **右クリックメニュー**: 選択、Inspectorで開く、Sceneビューでフォーカス、名前/パスのコピー、エクスプローラーで表示、関連Asset選択、Textureのチェック・参照元表示。ダブルクリック/EnterでScene ObjectをSceneビューにフォーカス。
+- **並べ替え**: 列見出しクリックで名前/値を降順→昇順→既定順に切り替え。
+- **Import設定バッジ**: Texture行にスキャン中PlatformのMax Size・Format・Crunchを表示（非圧縮は警告色）。フィルターに「非圧縮」「Max Size 4096以上」「Platform Overrideなし」「チェック中のみ」を追加。
+- **ライトテーマ**: インラインの固定色を`AbiTheme`へ置き換え、行の色はUSSでスキンごとに定義。
+- **ウィンドウ内の進捗**: モーダル進捗バーを廃止し、ヘッダー下に進捗とキャンセルを表示。同じAvatarの再スキャン中は前回結果を薄く表示したまま操作不可にする。1フレーム30ms以内で複数段階をまとめて進める。
+- **選択の同期**: Hierarchy / Projectで選んだObject・Assetに対応する内訳行を選択状態にしてスクロール。閉じたグループ内にある場合は展開する。
+- **Avatar選択**: Avatar欄の横の▾からシーン内のAvatarを選べる（複数Sceneはサブメニュー）。未選択時の画面にも選択ボタン。
+- **チェックボックス**: 行左端の30px幅全体をクリック領域にし、チェックマークを拡大。Shift+クリックで範囲チェック、押したままなぞると連続チェック、Spaceで選択行をチェック。列見出しのチェックで表示中を一括チェック/解除（一部のみは混在表示）。チェック中の行は背景色で区別。チェック操作では行選択・Pingをしない。
+- **ビルド履歴（Avatar単位）**: Avatar選択（件数付き、初期値は現在のAvatar）、「現在のAvatar」ボタン、Platform絞り込み。Avatarごとにビルド数、最新Overall、最新Bundle Size（前回比）と、主要7項目の推移グラフ（直近15回、棒クリックでビルド選択）を表示。一覧カードにBundle / Texture Memoryの前回比。詳細に前/次のビルド移動。比較では比較元を同じAvatarの任意のビルドから選択でき（既定は同Platformの直前）、Overallの変化、削減/増加/変化なしの件数、「変化した項目のみ」を表示。Platformが異なる比較には注意を表示。
+
+### 注意・未検証
+- Unity同梱RoslynによるEditorアセンブリの直接コンパイルは成功（警告なし）。Unity Editor GUIでの表示・操作は未確認。
+- 特に確認すること: `ListView`のDynamicHeightでの表示崩れ、チェック領域のドラッグ連続チェック、ホバー時アイコンの表示、ライトテーマの配色、Hierarchy選択との同期、推定値とProfiler値の差、`GetAutomaticFormat`の結果。
+- メモリ推定は概算。Android自動Formatの推定はASTC（LQ 8x8 / Normal 6x6 / HQ 4x4）を仮定しており、Build Settingsのテクスチャ圧縮上書きは考慮しない。
+- ビルド履歴のAvatar単位の集計はAvatar名で行う。同名の別Avatarは同じグループになる。

@@ -34,6 +34,9 @@ namespace AvaBuildInspector
         public string Section;
         public string DisplayName;
         public string DisplayValue;
+        public bool HasNumericValue;
+        public double NumericValue;
+        public string Unit;
         public string Rank;
         public string Accuracy;
         public string Explanation;
@@ -218,6 +221,9 @@ namespace AvaBuildInspector
                     Section = metric.Section,
                     DisplayName = metric.DisplayName,
                     DisplayValue = metric.DisplayValue,
+                    HasNumericValue = metric.NumericValue.HasValue && !string.IsNullOrEmpty(metric.Unit),
+                    NumericValue = metric.NumericValue ?? 0d,
+                    Unit = metric.Unit ?? string.Empty,
                     Rank = metric.Rank.ToString(),
                     Accuracy = metric.Accuracy.ToString(),
                     Explanation = metric.Explanation

@@ -1,7 +1,19 @@
-# Track only the AvaBuildInspector editor extension package
+# Ignore everything by default. This repository publishes only
+# the AvaBuild Inspector VPM package.
 /*
-!.gitignore
-!Packages/
-Packages/*
-!Packages/com.avabuild.inspector/
-!Packages/com.avabuild.inspector/**
+
+# Keep this ignore policy and repository documentation.
+!/.gitignore
+!/CHANGELOG.md
+!/LICENSE.txt
+!/README.md
+!/Docs/
+!/.github/
+!/.github/workflows/
+!/.github/workflows/release.yml
+
+# Keep only the VPM package.
+!/Packages/
+/Packages/*
+!/Packages/com.azipaworks.ava-build-inspector/
+!/Packages/com.azipaworks.ava-build-inspector/**

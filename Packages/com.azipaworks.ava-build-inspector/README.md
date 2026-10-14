@@ -11,7 +11,7 @@ Open `Tools > AvaBuild Inspector > Open Inspector` and drag an avatar with a
 
 - SDK-backed PC / Android performance values and ranks
 - automatic Quick Scan when the Avatar field changes
-- two primary tabs: Scan Results and Breakdown
+- primary tabs: Scan Results, Breakdown, and Build History
 - Overall rank and main issues
 - Full metric list with Exact / Estimated / Unavailable accuracy
 - compact texture-memory breakdown with thumbnails and asset navigation
@@ -27,5 +27,5 @@ Open `Tools > AvaBuild Inspector > Open Inspector` and drag an avatar with a
 Texture memory and PhysBone collision-check breakdowns are diagnostic estimates.
 The aggregate value and rank shown in the metric header come from the VRChat SDK.
 
-The window intentionally omits build, history, report, comparison, and export
-features to keep the workflow focused on immediate Quick Scan results.
+The Build History tab records results of VRChat SDK builds (stored in the
+project's `Library/AvaBuildInspector` folder) and shows per-metric trends.
